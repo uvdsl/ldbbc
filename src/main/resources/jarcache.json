@@ -1,0 +1,7 @@
+[
+  {
+  	"Content-Location": "http://example.org/path/to/cached/context.jsonld",
+  	"X-Classpath": "cached_remote_contexts/cache/context.jsonld",
+  	"Content-Type": "application/ld+json"
+  }
+]
