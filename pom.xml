@@ -5,7 +5,7 @@
 	<groupId>edu.kit.aifb.ls3</groupId>
 	<artifactId>ldbbc</artifactId>
 	<description>A simple implementation of a Linked Data Platform Basic Container using Jax-RS and NxParser</description>
-	<version>0.0.5-SNAPSHOT</version>
+	<version>0.0.6-SNAPSHOT</version>
 
 	<packaging>war</packaging>
 
@@ -13,16 +13,11 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<maven.compiler.source>1.7</maven.compiler.source>
-		<jetty.version>9.2.21.v20170120</jetty.version>
+		<jetty.version>9.2.22.v20170606</jetty.version>
 		<nxparser.version>3.0.0-SNAPSHOT</nxparser.version>
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-jdk14</artifactId>
-			<version>1.7.12</version>
-		</dependency>
 		<dependency>
 			<groupId>org.semanticweb.yars</groupId>
 			<artifactId>nxparser-jax-rs</artifactId>
@@ -106,18 +101,11 @@
 	     				<contextPath>/ldbbc</contextPath>
 					</webApp>
 				</configuration>
-				<dependencies>
-					<!-- Such that above logging works: -->
-					<dependency>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-						<version>1.6.6</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
+				<version>2.2</version>
 				<configuration>
 					<!-- we annotate instead of using web.xml -->
 					<failOnMissingWebXml>false</failOnMissingWebXml>
