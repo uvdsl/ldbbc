@@ -18,6 +18,8 @@ Alternatively, run LDBBC from the command line using the Jetty plugin for Apache
 ```sh
 $ mvn jetty:run
 ```
+Note that LDBBC requires Maven at at least version `3.1` when [they changed their logging system](https://maven.apache.org/maven-logging.html).
+If you are on an earlier version, you have to re-introduce the SLF4J dependencies removed in fe01d54f838ed84a99ac55f7585b113a2ba97d4a, see [the corresponding lines in the diff](https://github.com/kaefer3000/ldbbc/commit/fe01d54f838ed84a99ac55f7585b113a2ba97d4a#diff-600376dffeb79835ede4a0b285078036L22).
 #### Configuration on the command line
 ##### Disable request logging
 Per default, request logging is enabled on `INFO` level.
