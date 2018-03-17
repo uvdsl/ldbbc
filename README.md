@@ -20,10 +20,10 @@ $ mvn -Dmaven.test.skip=true install
 ## Usage
 
 ### Deploy on application server
-The thus compiled `.war` file can be deployed on an application server (eg. Apache Tomcat, Eclipse Jetty).
+The downloaded/compiled `.war` file can be deployed on an application server (eg. Apache Tomcat, Eclipse Jetty).
 
 ### Command line
-Alternatively, run LDBBC from the command line using the Jetty plugin for Apache Maven:
+Alternatively, check out the code and run LDBBC from the command line using the Jetty plugin for Apache Maven:
 ```sh
 $ mvn jetty:run
 ```
