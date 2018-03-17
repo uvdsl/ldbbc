@@ -7,6 +7,12 @@ LDBBC can be compiled using Apache Maven:
 ```sh
 $ mvn package
 ```
+You may need the development version of NxParser installed, do so by
+```sh
+$ git clone https://github.com/nxparser/nxparser
+$ cd nxparser
+$ mvn -Dmaven.test.skip=true install
+```
 
 ## Usage
 
