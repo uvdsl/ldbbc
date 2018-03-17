@@ -2,6 +2,9 @@
 A rough but fast implementation of one [Linked Data Platform (LDP)](https://www.w3.org/TR/ldp/) Container.
 Supports RDF in JSON-LD, Turtle, RDF/XML, and N-Triples.
 
+## Binaries
+See [Releases](https://github.com/kaefer3000/ldbbc/releases).
+
 ## Compilation
 LDBBC can be compiled using Apache Maven:
 ```sh
