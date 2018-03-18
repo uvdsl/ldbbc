@@ -1,6 +1,7 @@
 # Welcome to LDBBC
 A rough but fast implementation of one [Linked Data Platform (LDP)](https://www.w3.org/TR/ldp/) Container.
 Supports RDF in JSON-LD, Turtle, RDF/XML, and N-Triples.
+Stores data in memory and does not persist data on shutdown.
 
 ## Binaries
 See [Releases](https://github.com/kaefer3000/ldbbc/releases).
