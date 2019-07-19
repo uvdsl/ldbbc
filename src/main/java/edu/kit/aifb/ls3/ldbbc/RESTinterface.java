@@ -5,9 +5,11 @@ import java.net.URISyntaxException;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
@@ -34,6 +36,7 @@ import org.semanticweb.yars.jaxrs.header.HeaderField;
 import org.semanticweb.yars.jaxrs.header.InjectHeaders;
 import org.semanticweb.yars.jaxrs.trailingslash.NotFoundOnTrailingSlash;
 import org.semanticweb.yars.jaxrs.trailingslash.RedirectMissingTrailingSlash;
+import org.semanticweb.yars.nx.BNode;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.NodesReResolvingIterator;
 import org.semanticweb.yars.nx.Resource;
@@ -75,6 +78,7 @@ public class RESTinterface {
 
 			l.add(new Node[] { baseRes, RDF.TYPE, LDP.BASIC_CONTAINER });
 			l.add(new Node[] { baseRes, RDF.TYPE, LDP.CONTAINER });
+			l.add(new Node[] { baseRes, LDP.CONTAINS, new Resource(base.resolve("lists/").toString(), false)});
 
 			for (String s : map.keySet()) {
 				l.add(new Node[] { baseRes, LDP.CONTAINS, new Resource(base.resolve(s).toString()) });
@@ -256,4 +260,168 @@ public class RESTinterface {
 		}
 	}
 
+	@Path("/lists/")
+	@POST
+	public Response createList(Iterable<Node[]> input, @Context UriInfo uriinfo) {
+		AtomicInteger id = (AtomicInteger) _ctx.getAttribute(ServletContextAttributes.CURRENT_POSTED_LIST_ID.name());
+
+		// Get the URI of the collection against which to resolve the local
+		// name.
+		URI absPath = uriinfo.getAbsolutePath();
+		URI uriOfPostRequest;
+		if (!absPath.getPath().endsWith("/"))
+			try {
+				uriOfPostRequest = new URI(absPath.getScheme(), absPath.getAuthority(), absPath.getPath() + "/",
+						absPath.getQuery(), absPath.getFragment());
+			} catch (URISyntaxException e) {
+				uriOfPostRequest = absPath;
+			}
+		else
+			uriOfPostRequest = absPath;
+
+		URI newBaseURI = uriOfPostRequest.resolve(Integer.toString(id.incrementAndGet()));
+
+		Resource listURI = new Resource("<" + newBaseURI.toString() + "#list>", true);
+
+		LinkedList<Node[]> triples = new LinkedList<Node[]>();
+		
+		boolean listTripleFound = false;
+
+		for (Node[] nx : new NodesReResolvingIterator(input, newBaseURI)) {
+			if (nx[1].equals(RDF.TYPE) && nx[2].equals(RDF.LIST)) {
+				listTripleFound = true;
+				listURI = (Resource) nx[0];
+			}
+			triples.add(nx);
+		}
+
+		if (!listTripleFound)
+			triples.add(new Node[] { listURI, RDF.TYPE, RDF.LIST });
+
+		@SuppressWarnings("unchecked")
+		Map<String, Iterable<Node[]>> map = (Map<String, Iterable<Node[]>>) _ctx
+				.getAttribute(DerServletContextListener.ServletContextAttributes.STORED_RDF_DATASET.name());
+
+		try {
+			map.put("lists/" + id, triples);
+
+			return Response.created(listURI.toURI()).build();
+		} catch (URISyntaxException e) {
+			// shouldn't happen
+			throw new BadRequestException(e);
+		}
+	}
+
+	@Path("/lists/")
+	@GET
+	public Response getLists(@Context UriInfo uriinfo) {
+
+		@SuppressWarnings("unchecked")
+		Map<String, Iterable<Node[]>> map = (Map<String, Iterable<Node[]>>) _ctx
+				.getAttribute(DerServletContextListener.ServletContextAttributes.STORED_RDF_DATASET.name());
+
+		List<Node[]> ret = new LinkedList<Node[]>();
+
+		URI absPath = uriinfo.getAbsolutePath();
+		URI uriOfRequest;
+		if (!absPath.getPath().endsWith("/"))
+			try {
+				uriOfRequest = new URI(absPath.getScheme(), absPath.getAuthority(), absPath.getPath() + "/",
+						absPath.getQuery(), absPath.getFragment());
+			} catch (URISyntaxException e) {
+				uriOfRequest = absPath;
+			}
+		else
+			uriOfRequest = absPath;
+
+		for (String s : map.keySet()) {
+			if (s.startsWith("lists/"))
+				ret.add(new Node[] { new Resource(uriOfRequest.toString(), false), LDP.CONTAINS,
+						new Resource(uriinfo.getBaseUri().resolve(s).toString(), false) });
+		}
+
+		return Response.ok(new GenericEntity<Iterable<Node[]>>(ret) {
+		}).build();
+	}
+
+	@Path("{id:lists/.+}")
+	public Content getList() {
+		return new ListContent();
+	}
+	
+	public class ListContent extends Content {
+		
+		@POST
+		public Response addToList(@PathParam(value = "id") String id, Iterable<Node[]> input, @Context UriInfo uriinfo) {
+			@SuppressWarnings("unchecked")
+			Map<String, Iterable<Node[]>> map = (Map<String, Iterable<Node[]>>) _ctx
+					.getAttribute(DerServletContextListener.ServletContextAttributes.STORED_RDF_DATASET.name());
+			
+			Resource listAppend = new Resource("<http://www.w3.org/2000/10/swap/list#append>", true);
+			
+			if (!map.containsKey(id))
+				throw new NotFoundException();
+			
+			List<Node> toBeAppended = new LinkedList<Node>();
+			
+			List<Node[]> rdfGraphToBeStored = new LinkedList<Node[]>();
+			
+			for (Node[] nx: input) {
+				if (nx[1].equals(listAppend))
+						toBeAppended.add(nx[2]);
+			}
+
+			Node listHead = null;
+			boolean seenList = false;
+			// Iterating over all triples that are there already
+			for (Node[] nx : map.get(id)) {
+				
+				if (nx[1].equals(RDF.TYPE) && nx[2].equals(RDF.LIST))
+						listHead = nx[0];
+				if (nx[1].equals(RDF.REST) || nx[1].equals(RDF.FIRST))
+					seenList = true;
+				
+				// If we are at the list end, we need to do something
+				if (nx[1].equals(RDF.REST) && nx[2].equals(RDF.NIL)) {
+					// A replacement triple
+					BNode bn = new BNode("b" + UUID.randomUUID().toString());
+					rdfGraphToBeStored.add(new Node[] { nx[0], nx[1], bn });
+					append(bn, toBeAppended, rdfGraphToBeStored);
+
+				} else
+					// copying
+					rdfGraphToBeStored.add(nx);
+			}
+			
+			if (!seenList) {
+				if (listHead == null)
+					throw new BadRequestException();
+				append(listHead, toBeAppended, rdfGraphToBeStored);
+			}
+			
+			map.put(id, rdfGraphToBeStored);
+			return Response.noContent().build();
+		}
+	}
+	
+	private static void append(Node currentListItem, List<Node> toBeAppended, List<Node[]> rdfGraph) {
+		Iterator<Node> it = toBeAppended.iterator();
+		if (!it.hasNext())
+			return;
+
+		// Building new triples
+		Node appendMe;
+		while (it.hasNext()) {
+			appendMe = it.next();
+			rdfGraph.add(new Node[] { currentListItem, RDF.FIRST, appendMe });
+			if (it.hasNext()) {
+				// More URIs to append
+				BNode bn2 = new BNode("b" + UUID.randomUUID().toString());
+				rdfGraph.add(new Node[] { currentListItem, RDF.REST, bn2 });
+				currentListItem = bn2;
+			} else
+				// No more URIs to append
+				rdfGraph.add(new Node[] { currentListItem, RDF.REST, RDF.NIL });
+		}
+	}
 }

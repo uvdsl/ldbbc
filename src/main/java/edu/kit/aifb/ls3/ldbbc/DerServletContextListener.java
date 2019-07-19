@@ -1,5 +1,6 @@
 package edu.kit.aifb.ls3.ldbbc;
 
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +15,7 @@ import javax.servlet.ServletRegistration;
 import javax.servlet.annotation.WebListener;
 import javax.ws.rs.HttpMethod;
 
+import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Nodes;
 
 @WebListener
@@ -40,7 +42,19 @@ public class DerServletContextListener implements ServletContextListener {
 		 * that has last been created in a POST request. The ID is stored as
 		 * {@link AtomicInteger}.
 		 */
-		CURRENT_POSTED_RESOURCE_ID
+		CURRENT_POSTED_RESOURCE_ID,
+		/**
+		 * This enum constant's name represents the key in the {@link ServletContext},
+		 * whose value represents a map from {@link AtomicInteger} to a
+		 * {@link LinkedList} of RDF terms, ie. instances of {@link Node}.
+		 */
+		LISTS,
+		/**
+		 * This enum constant's name represents the key in the {@link ServletContext},
+		 * whose value represents the ID of the list resource that has last been created
+		 * in a POST request. The ID is stored as {@link AtomicInteger}.
+		 */
+		CURRENT_POSTED_LIST_ID
 	}
 
 	@Override
@@ -72,6 +86,10 @@ public class DerServletContextListener implements ServletContextListener {
 				ServletContextAttributes.CURRENT_POSTED_RESOURCE_ID.name(),
 				new AtomicInteger());
 
+		_ctx.setAttribute(ServletContextAttributes.LISTS.name(),
+				new ConcurrentHashMap<AtomicInteger, LinkedList<Node>>());
+
+		_ctx.setAttribute(ServletContextAttributes.CURRENT_POSTED_LIST_ID.name(), new AtomicInteger());
 	}
 
 	@Override
