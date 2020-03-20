@@ -13,6 +13,7 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.ServletRegistration;
 import javax.servlet.annotation.WebListener;
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.HttpHeaders;
 
 import org.semanticweb.yars.nx.Nodes;
 
@@ -61,6 +62,8 @@ public class DerServletContextListener implements ServletContextListener {
 		fr = _ctx.addFilter("cross-origin", org.eclipse.jetty.servlets.CrossOriginFilter.class.getName());
 		fr.setInitParameter(org.eclipse.jetty.servlets.CrossOriginFilter.ALLOWED_METHODS_PARAM,
 				HttpMethod.GET + "," + HttpMethod.PUT + "," + HttpMethod.POST + "," + HttpMethod.DELETE);
+		fr.setInitParameter(org.eclipse.jetty.servlets.CrossOriginFilter.EXPOSED_HEADERS_PARAM,
+				HttpHeaders.LOCATION);
 		fr.addMappingForUrlPatterns(null, true, "/*");
 		
 		// Initialise the two data strucutres that we need for the functionality
