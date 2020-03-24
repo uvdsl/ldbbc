@@ -47,3 +47,6 @@ You can change the port by setting the `jetty.port` property:
 $ mvn -Djetty.port=8081 jetty:run
 ```
 
+#####
+
+![Publish Docker image to GitHub Package Registry (GPR)](https://github.com/uvdsl/ldbbc/workflows/Publish%20Docker%20image%20to%20GitHub%20Package%20Registry%20(GPR)/badge.svg)
