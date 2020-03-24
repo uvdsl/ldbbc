@@ -5,8 +5,9 @@ COPY src /tmp/src/
 WORKDIR /tmp/
 RUN git clone https://github.com/nxparser/nxparser \
 && cd nxparser \
-&& mvn -Dmaven.test.skip=true install
-RUN mvn package -DskipTests
+&& mvn -Dmaven.test.skip=true install\
+&& cd ..
+&& mvn package -DskipTests
 
 FROM jetty:latest
 COPY --from=builder /tmp/target/ldbbc.war /var/lib/jetty/webapps/ldbbc.war
