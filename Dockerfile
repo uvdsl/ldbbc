@@ -1,4 +1,5 @@
 FROM maven:3.5.2-jdk-8-alpine AS builder
+RUN apk add --no-cache git
 COPY pom.xml /tmp/
 COPY src /tmp/src/
 WORKDIR /tmp/
