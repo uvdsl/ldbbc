@@ -11,8 +11,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.target>1.7</maven.compiler.target>
-		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
 		<jetty.version>9.2.22.v20170606</jetty.version>
 		<nxparser.version>3.0.0-SNAPSHOT</nxparser.version>
 	</properties>
@@ -98,8 +98,12 @@
 					<!-- To log HTTP requests on INFO level: -->
 					<requestLog implementation="org.eclipse.jetty.server.Slf4jRequestLog"></requestLog>
 					<webApp>
-	     				<contextPath>/ldbbc</contextPath>
+	     					<contextPath>/ldbbc</contextPath>
 					</webApp>
+					<httpConnector>
+						<!--host>localhost</host-->
+						<port>8080</port>
+					</httpConnector>
 				</configuration>
 			</plugin>
 			<plugin>
