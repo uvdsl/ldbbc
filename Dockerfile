@@ -6,7 +6,7 @@ WORKDIR /tmp/
 RUN git clone https://github.com/nxparser/nxparser \
 && cd nxparser \
 && mvn -Dmaven.test.skip=true install\
-&& cd ..
+&& cd .. \
 && mvn package -DskipTests
 
 FROM jetty:latest
